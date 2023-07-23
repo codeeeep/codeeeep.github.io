@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>测试 on codeep&#39;s blog</title>
+    <link>https://codeeeep.github.io/tags/%E6%B5%8B%E8%AF%95/</link>
+    <description>Recent content in 测试 on codeep&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
+    <webMaster>codeeeep@gmail.com (codeep)</webMaster>
+    <lastBuildDate>Sun, 23 Jul 2023 13:51:24 +0800</lastBuildDate><atom:link href="https://codeeeep.github.io/tags/%E6%B5%8B%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>我的第一篇博客</title>
+      <link>https://codeeeep.github.io/posts/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</link>
+      <pubDate>Sun, 23 Jul 2023 13:51:24 +0800</pubDate>
+      <author>codeeeep@gmail.com (codeep)</author>
+      <guid>https://codeeeep.github.io/posts/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</guid>
+      <description>记录技术与温度 文字比言语更具力量 起源 事实上，记录是人们最根本的天性 标题</description>
+    </item>
+    
+  </channel>
+</rss>
