@@ -69,6 +69,13 @@ hasCJKLanguage = true
   # 网站图片, 用于 Open Graph 和 Twitter Cards
   images = ""
 
+  # App icon config
+  # 应用图标配置
+  [params.app]
+    # modern SVG favicon to use in place of older style .png and .ico files
+    # 更现代的 SVG 网站图标, 可替代旧的 .png 和 .ico 文件
+    svgFavicon = "/avatar.svg"
+
   # Header config
   # 页面头部导航栏配置
   [params.header]
@@ -145,26 +152,26 @@ hasCJKLanguage = true
       # 当你没有在文章前置参数中设置 "hiddenFromHomePage" 时的默认行为
       defaultHiddenFromHomePage = false
   # 添加不蒜子计数
-[params.busuanzi]
-  enable = true
-  # 是否开启全站独立访客数
-  site_uv = true
-  # 全站独立访客数前的图标或提示语
-  site_uv_pre = '<i class="fa fa-user"></i>' 
-  # 全站独立访客数后的图标或提示语
-  site_uv_post = ''
-  # 是否开启全站浏览量
-  site_pv = true
-  # 全站浏览量前的图标或提示语
-  site_pv_pre = '<i class="fa fa-eye"></i>'
-  # 全站浏览量后的图标或提示语
-  site_pv_post = ''
-  # 是否开启单页浏览量
-  page_pv = true
-  # 单页浏览量前的图标或提示语
-  page_pv_pre = '<i class="far fa-eye fa-fw"></i>'
-  # 单页浏览量后的图标或提示语
-  page_pv_post = ''
+  [params.busuanzi]
+    enable = true
+    # 是否开启全站独立访客数
+    site_uv = true
+    # 全站独立访客数前的图标或提示语
+    site_uv_pre = '<i class="fa fa-user"></i>' 
+    # 全站独立访客数后的图标或提示语
+    site_uv_post = ''
+    # 是否开启全站浏览量
+    site_pv = true
+    # 全站浏览量前的图标或提示语
+    site_pv_pre = '<i class="fa fa-eye"></i>'
+    # 全站浏览量后的图标或提示语
+    site_pv_post = ''
+    # 是否开启单页浏览量
+    page_pv = true
+    # 单页浏览量前的图标或提示语
+    page_pv_pre = '<i class="far fa-eye fa-fw"></i>'
+    # 单页浏览量后的图标或提示语
+    page_pv_post = ''
 
 
 
