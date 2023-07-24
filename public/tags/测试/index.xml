@@ -1,8 +1,8 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>测试 - 标签 - codeep&#39;s blog</title>
+        <title>测试 - 标签 - Codeep&#39;s Blog</title>
         <link>https://codeeeep.github.io/tags/%E6%B5%8B%E8%AF%95/</link>
-        <description>测试 - 标签 - codeep&#39;s blog</description>
+        <description>测试 - 标签 - Codeep&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
             <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Sun, 23 Jul 2023 23:42:09 &#43;0800</lastBuildDate><atom:link href="https://codeeeep.github.io/tags/%E6%B5%8B%E8%AF%95/" rel="self" type="application/rss+xml" /><item>
     <title>BeforeGoodFirstIssue</title>

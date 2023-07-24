@@ -1,8 +1,8 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>文章 - 分类 - codeep&#39;s blog</title>
+        <title>文章 - 分类 - Codeep&#39;s Blog</title>
         <link>https://codeeeep.github.io/categories/%E6%96%87%E7%AB%A0/</link>
-        <description>文章 - 分类 - codeep&#39;s blog</description>
+        <description>文章 - 分类 - Codeep&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
             <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Sun, 23 Jul 2023 21:59:23 &#43;0800</lastBuildDate><atom:link href="https://codeeeep.github.io/categories/%E6%96%87%E7%AB%A0/" rel="self" type="application/rss+xml" /><item>
     <title>划水测试</title>

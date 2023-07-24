@@ -4,7 +4,7 @@ baseURL = "https://codeeeep.github.io/"
 theme = "LoveIt"
 
 # 网站标题
-title = "codeep's blog"
+title = "Codeep's Blog"
 
 # determines default content language ["en", "zh-cn", "fr", "pl", ...]
 # 设置默认的语言 ["en", "zh-cn", "fr", "pl", ...]
@@ -86,7 +86,7 @@ hasCJKLanguage = true
       logo = ""
       # title name
       # 标题名称
-      name = "codeep's blog"
+      name = "Codeep's Blog"
       # you can add extra information before the name (HTML format is supported), such as icons
       # 你可以在名称 (允许 HTML 格式) 之前添加其他信息, 例如图标
       pre = ""
@@ -144,6 +144,28 @@ hasCJKLanguage = true
       # LoveIt 删除 | 0.2.0 被 params.page 中的 hiddenFromHomePage 替代
       # 当你没有在文章前置参数中设置 "hiddenFromHomePage" 时的默认行为
       defaultHiddenFromHomePage = false
+  # 添加不蒜子计数
+[params.busuanzi]
+  enable = true
+  # 是否开启全站独立访客数
+  site_uv = true
+  # 全站独立访客数前的图标或提示语
+  site_uv_pre = '<i class="fa fa-user"></i>' 
+  # 全站独立访客数后的图标或提示语
+  site_uv_post = ''
+  # 是否开启全站浏览量
+  site_pv = true
+  # 全站浏览量前的图标或提示语
+  site_pv_pre = '<i class="fa fa-eye"></i>'
+  # 全站浏览量后的图标或提示语
+  site_pv_post = ''
+  # 是否开启单页浏览量
+  page_pv = true
+  # 单页浏览量前的图标或提示语
+  page_pv_pre = '<i class="far fa-eye fa-fw"></i>'
+  # 单页浏览量后的图标或提示语
+  page_pv_post = ''
+
 
 
 # Hugo 解析文档的配置
