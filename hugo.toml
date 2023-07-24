@@ -52,7 +52,7 @@ hasCJKLanguage = true
     url = "/categories/"
     title = ""
 
-    [[menu.main]]
+  [[menu.main]]
     name = "关于我"
     # weight 参数可以看做菜单栏上各项的排序，越大的排在电脑网页的越右边
     weight = 4
