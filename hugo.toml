@@ -155,13 +155,13 @@ hasCJKLanguage = true
   [params.busuanzi]
     enable = true
     # 是否开启全站独立访客数
-    site_uv = true
+    site_uv = false
     # 全站独立访客数前的图标或提示语
     site_uv_pre = '<i class="fa fa-user"></i>' 
     # 全站独立访客数后的图标或提示语
     site_uv_post = ''
     # 是否开启全站浏览量
-    site_pv = true
+    site_pv = false
     # 全站浏览量前的图标或提示语
     site_pv_pre = '<i class="fa fa-eye"></i>'
     # 全站浏览量后的图标或提示语
