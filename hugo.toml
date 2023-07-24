@@ -51,14 +51,15 @@ hasCJKLanguage = true
     name = "分类"
     url = "/categories/"
     title = ""
-
   [[menu.main]]
-    name = "关于我"
     # weight 参数可以看做菜单栏上各项的排序，越大的排在电脑网页的越右边
     weight = 4
     identifier = "about"
+    pre = ""
+    post = ""
+    name = "关于我"
     url = "/about/"
-    title = "About"
+    title = ""
 
 [params]
   # 网站默认主题样式 ["auto", "light", "dark"]
