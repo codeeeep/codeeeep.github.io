@@ -1,0 +1,2 @@
+# 取消在 master 分支推送 /public 文件，方便进行 Vercel 部署
+public
