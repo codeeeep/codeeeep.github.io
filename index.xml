@@ -4,9 +4,19 @@
         <link>https://codeeeep.github.io/</link>
         <description>这是我的全新 Hugo 网站</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
-            <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Sun, 23 Jul 2023 23:42:09 &#43;0800</lastBuildDate>
+            <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Tue, 01 Aug 2023 19:03:31 &#43;0800</lastBuildDate>
             <atom:link href="https://codeeeep.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>慢慢来 比较快</title>
+    <link>https://codeeeep.github.io/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/</link>
+    <pubDate>Tue, 01 Aug 2023 19:03:31 &#43;0800</pubDate>
+    <author>codeep</author>
+    <guid>https://codeeeep.github.io/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/runnig.jpg" referrerpolicy="no-referrer">
+            </div>骐骥一跃，不能十步；驽马十驾，功在不舍]]></description>
+</item>
+<item>
     <title>BeforeGoodFirstIssue</title>
     <link>https://codeeeep.github.io/posts/beforegoodfirstissue/</link>
     <pubDate>Sun, 23 Jul 2023 23:42:09 &#43;0800</pubDate>
@@ -32,7 +42,7 @@
     <guid>https://codeeeep.github.io/posts/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</guid>
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/user.jpg" referrerpolicy="no-referrer">
-            </div>记录技术与温度 文字比言语更具力量 起源 事实上，记录是人们最根本的天性 标题]]></description>
+            </div>文字比言语更具力量]]></description>
 </item>
 </channel>
 </rss>

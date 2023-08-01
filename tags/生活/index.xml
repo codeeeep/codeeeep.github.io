@@ -1,0 +1,18 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>生活 - 标签 - Codeep&#39;s Blog</title>
+        <link>https://codeeeep.github.io/tags/%E7%94%9F%E6%B4%BB/</link>
+        <description>生活 - 标签 - Codeep&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
+            <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Tue, 01 Aug 2023 19:03:31 &#43;0800</lastBuildDate><atom:link href="https://codeeeep.github.io/tags/%E7%94%9F%E6%B4%BB/" rel="self" type="application/rss+xml" /><item>
+    <title>慢慢来 比较快</title>
+    <link>https://codeeeep.github.io/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/</link>
+    <pubDate>Tue, 01 Aug 2023 19:03:31 &#43;0800</pubDate>
+    <author>codeep</author>
+    <guid>https://codeeeep.github.io/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/runnig.jpg" referrerpolicy="no-referrer">
+            </div>骐骥一跃，不能十步；驽马十驾，功在不舍]]></description>
+</item>
+</channel>
+</rss>
