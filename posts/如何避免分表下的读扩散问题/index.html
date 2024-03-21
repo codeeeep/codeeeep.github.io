@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>如何避免分表下的读扩散问题 - Codeep&#39;s Blog</title><meta name="Description" content="这是我的全新 Hugo 网站"><meta property="og:title" content="如何避免分表下的读扩散问题" />
+<meta property="og:description" content="深入探究，挖掘真相" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-21T15:18:45+08:00" />
+<meta property="article:modified_time" content="2024-03-21T15:18:45+08:00" /><meta property="og:site_name" content="我的网站" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="如何避免分表下的读扩散问题"/>
+<meta name="twitter:description" content="深入探究，挖掘真相"/>
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="icon" href="/avatar.svg"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" /><link rel="prev" href="https://codeeeep.github.io/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "如何避免分表下的读扩散问题",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/codeeeep.github.io\/posts\/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98\/"
+        },"genre": "posts","keywords": "优化","wordcount":  957 ,
+        "url": "https:\/\/codeeeep.github.io\/posts\/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98\/","datePublished": "2024-03-21T15:18:45+08:00","dateModified": "2024-03-21T15:18:45+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "codeep"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Codeep&#39;s Blog">Codeep&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/about/"> 关于我 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Codeep&#39;s Blog">Codeep&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/about/" title="">关于我</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">如何避免分表下的读扩散问题</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>codeep</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-21">2024-03-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 957 字&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 2 分钟&nbsp;
+    
+
+    
+        
+
+        
+        
+            <span id="busuanzi_container_value_page_pv"><i class="far fa-eye fa-fw"></i>
+                
+                <span id="busuanzi_value_page_pv"></span>&nbsp;次阅读</span>
+        
+    
+
+</div>
+        </div><div class="featured-image"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/user.jpg"
+        data-srcset="/images/user.jpg, /images/user.jpg 1.5x, /images/user.jpg 2x"
+        data-sizes="auto"
+        alt="/images/user.jpg"
+        title="/images/user.jpg" width="1000" height="400" /></div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#设计路由表和不设计路由表的区别">设计路由表和不设计路由表的区别</a>
+      <ul>
+        <li><a href="#引入路由表">引入路由表</a></li>
+        <li><a href="#直接查询原表">直接查询原表</a></li>
+        <li><a href="#小插曲">小插曲</a></li>
+      </ul>
+    </li>
+    <li><a href="#设计路由表的原理">设计路由表的原理</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="设计路由表和不设计路由表的区别">设计路由表和不设计路由表的区别</h2>
+<h3 id="引入路由表">引入路由表</h3>
+<p>笔者为了应对海量短链接生成的场景，对原先的短链接表t_link进行了水平分表，分片键为了配合其他业务选择了gid，即分组 id。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/fenbiao.png"
+        data-srcset="/images/fenbiao.png, /images/fenbiao.png 1.5x, /images/fenbiao.png 2x"
+        data-sizes="auto"
+        alt="/images/fenbiao.png"
+        title="1" /></p>
+<p>现在当用户输入短链接后我们将查出存储的原始网址然后重定向过去
+但是问题是用户只会传来短链接网址，而不会传递gid，我们先设计路由表t_goto_link，并且选取短链接网址作为分片键，这样让用户首先在路由表中查询根据短链接网址查询出gid，再拿着gid去t_link中查询原始链接（为何设计路由表先不挑明，读者可以根据下面的实验自行思考下）</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 根据原始短链接来查询路由表中的 gid
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">LambdaQueryWrapper</span><span class="o">&lt;</span><span class="n">ShortLinkGotoDO</span><span class="o">&gt;</span> <span class="n">linkGotoQueryWrapper</span> <span class="o">=</span> <span class="n">Wrappers</span><span class="o">.</span><span class="na">lambdaQuery</span><span class="o">(</span><span class="n">ShortLinkGotoDO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkGotoDO</span><span class="o">::</span><span class="n">getFullShortUrl</span><span class="o">,</span> <span class="n">fullShortUrl</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ShortLinkGotoDO</span> <span class="n">shortLinkGotoDO</span> <span class="o">=</span> <span class="n">shortLinkGotoMapper</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span><span class="n">linkGotoQueryWrapper</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">LambdaQueryWrapper</span><span class="o">&lt;</span><span class="n">ShortLinkDO</span><span class="o">&gt;</span> <span class="n">queryWrapper</span> <span class="o">=</span> <span class="n">Wrappers</span><span class="o">.</span><span class="na">lambdaQuery</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 拿着 gid 去查询 link 表得出原始链接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getGid</span><span class="o">,</span> <span class="n">shortLinkGotoDO</span><span class="o">.</span><span class="na">getGid</span><span class="o">())</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getFullShortUrl</span><span class="o">,</span> <span class="n">fullShortUrl</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getDelFlag</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getEnableStatus</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ShortLinkDO</span> <span class="n">shortLinkDO</span> <span class="o">=</span> <span class="n">baseMapper</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span><span class="n">queryWrapper</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">((</span><span class="n">HttpServletResponse</span><span class="o">)</span> <span class="n">response</span><span class="o">).</span><span class="na">sendRedirect</span><span class="o">(</span><span class="n">shortLinkDO</span><span class="o">.</span><span class="na">getOriginUrl</span><span class="o">())</span>
+</span></span></code></pre></div><p>测试时长为 55 ms 左右
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2.png"
+        data-srcset="/images/2.png, /images/2.png 1.5x, /images/2.png 2x"
+        data-sizes="auto"
+        alt="/images/2.png"
+        title="2" />
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2-5.png"
+        data-srcset="/images/2-5.png, /images/2-5.png 1.5x, /images/2-5.png 2x"
+        data-sizes="auto"
+        alt="/images/2-5.png"
+        title="2.5" /></p>
+<h3 id="直接查询原表">直接查询原表</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">LambdaQueryWrapper</span><span class="o">&lt;</span><span class="n">ShortLinkDO</span><span class="o">&gt;</span> <span class="n">queryWrapper</span> <span class="o">=</span> <span class="n">Wrappers</span><span class="o">.</span><span class="na">lambdaQuery</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 这里没有 gid，而是直接查出原始 url
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getFullShortUrl</span><span class="o">,</span> <span class="n">fullShortUrl</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getDelFlag</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">::</span><span class="n">getEnableStatus</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ShortLinkDO</span> <span class="n">shortLinkDO</span> <span class="o">=</span> <span class="n">baseMapper</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span><span class="n">queryWrapper</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">((</span><span class="n">HttpServletResponse</span><span class="o">)</span> <span class="n">response</span><span class="o">).</span><span class="na">sendRedirect</span><span class="o">(</span><span class="n">shortLinkDO</span><span class="o">.</span><span class="na">getOriginUrl</span><span class="o">())</span>
+</span></span></code></pre></div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/3.png"
+        data-srcset="/images/3.png, /images/3.png 1.5x, /images/3.png 2x"
+        data-sizes="auto"
+        alt="/images/3.png"
+        title="5" />
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/4.png"
+        data-srcset="/images/4.png, /images/4.png 1.5x, /images/4.png 2x"
+        data-sizes="auto"
+        alt="/images/4.png"
+        title="6" /></p>
+<p>怎么还是和引入路由表时间差不多，都是 50 ms 左右？话说不应该啊？难道引入路由表引入了个寂寞？
+而且后期肯定要针对路由信息加缓存，到时候岂不是 MySQL 和 Redis 两头空？</p>
+<h3 id="小插曲">小插曲</h3>
+<p>于是笔者首先查看了 Sharding Sphere 的真实语句：确实实打实的执行了整整 16 次UNION操作，话说怎么样也应该比单表查询慢点吧？毕竟union16 张表可不是闹着玩的
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/5.png"
+        data-srcset="/images/5.png, /images/5.png 1.5x, /images/5.png 2x"
+        data-sizes="auto"
+        alt="/images/5.png"
+        title="7" />
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/6.png"
+        data-srcset="/images/6.png, /images/6.png 1.5x, /images/6.png 2x"
+        data-sizes="auto"
+        alt="/images/6.png"
+        title="8" /></p>
+<p>确定 Sharding Sphere 没有问题后，笔者试着查了查本机数据库，好家伙，一下子就发现t_link表咋大部分都是没记录的！
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/7.png"
+        data-srcset="/images/7.png, /images/7.png 1.5x, /images/7.png 2x"
+        data-sizes="auto"
+        alt="/images/7.png"
+        title="9" /></p>
+<p>只有t_link_1有 2w 左右数据
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/8.png"
+        data-srcset="/images/8.png, /images/8.png 1.5x, /images/8.png 2x"
+        data-sizes="auto"
+        alt="/images/8.png"
+        title="10" /></p>
+<p>真相就水落石出了：联合表了，但是联合了 15 张空表，【联合了，但没完全联】
+于是笔者开始疯狂加数据，直到把其余的t_link表量级抬上去，插入 1w 条数据
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/9.png"
+        data-srcset="/images/9.png, /images/9.png 1.5x, /images/9.png 2x"
+        data-sizes="auto"
+        alt="/images/9.png"
+        title="11" /></p>
+<p>开测！！！
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/10.png"
+        data-srcset="/images/10.png, /images/10.png 1.5x, /images/10.png 2x"
+        data-sizes="auto"
+        alt="/images/10.png"
+        title="12" />
+<img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/11.png"
+        data-srcset="/images/11.png, /images/11.png 1.5x, /images/11.png 2x"
+        data-sizes="auto"
+        alt="/images/11.png"
+        title="13" /></p>
+<p>结果确实花费时间要长，要是数据量级再大点（比如千万级别），还能更加体现路由表的优越性！</p>
+<h2 id="设计路由表的原理">设计路由表的原理</h2>
+<p>不难发现，不用分片键直接查询会导致 读扩散：即联合所有的表挨个查。要是使用分片键查的话就会直接通过分片规则直接定位到一张表中（比如增加查询条件分片键 gid 后，就会根据 gid Hash 到某一张表中，要查到数据就集中在那里）
+所以即使用户传不来 gid，我们也得要事先拿到 gid 再去查表，就类似在不改变原表索引的基础上，原表设计了固定的索引，我们即使没有索引也要建张表让原始查询条件走索引。
+这不恰好是倒排索引的设计思想吗？无非就是在大量数据的场景下依然能提供普通索引列或其他更多维度的查询。所以路由表正好是提供走索引拿到分片键的捷径</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-03-21</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" data-title="如何避免分表下的读扩散问题" data-hashtags="优化"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" data-hashtag="优化"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" data-title="如何避免分表下的读扩散问题"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" data-title="如何避免分表下的读扩散问题"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" data-title="如何避免分表下的读扩散问题" data-image="/images/user.jpg"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/%E4%BC%98%E5%8C%96/">优化</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/%E6%85%A2%E6%85%A2%E6%9D%A5%E6%AF%94%E8%BE%83%E5%BF%AB/" class="prev" rel="prev" title="慢慢来 比较快"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>慢慢来 比较快</a></div>
+</div>
+<div id="comments"><div id="giscus" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://giscus.app">Giscus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2023 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">codeep</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span><span class="icp-splitter">&nbsp;|&nbsp;</span><br class="icp-br"/>
+                    <span class="icp"><a href="https://beian.miit.gov.cn/">赣ICP备2022010224号-1</a></span></div>
+    
+        
+        <script async src=" //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js "></script>
+    
+
+    
+        
+            <section>
+                
+
+                
+
+                
+            </section>
+        
+
+        
+        
+    
+
+</div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":50},"comment":{"giscus":{"category":"Announcements","categoryId":"DIC_kwDOJ_INd84CYGGX","darkTheme":"dark_dimmed","emitMetadata":"0","inputPosition":"bottom","lang":"zh-CN","lazyLoading":false,"lightTheme":"light","mapping":"pathname","reactionsEnabled":"1","repo":"codeeeep/Giscus","repoId":"R_kgDOJ_INdw"}}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
