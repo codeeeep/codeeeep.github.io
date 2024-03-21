@@ -113,19 +113,11 @@
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/fenbiao.png"
-        data-srcset="/images/fenbiao.png, /images/fenbiao.png 1.5x, /images/fenbiao.png 2x"
+        data-src="/images/image1.png"
+        data-srcset="/images/image1.png, /images/image1.png 1.5x, /images/image1.png 2x"
         data-sizes="auto"
-        alt="/images/fenbiao.png"
-        title="测试一下是否有用" /></p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/images/record1.png"
-        data-srcset="/images/record1.png, /images/record1.png 1.5x, /images/record1.png 2x"
-        data-sizes="auto"
-        alt="/images/record1.png"
-        title="第一次跑到 4 公里" width="1170" height="653" /></p>
+        alt="/images/image1.png"
+        title="测试一下是否有用" width="595" height="348" /></p>
 <p>现在当用户输入短链接后我们将查出存储的原始网址然后重定向过去
 但是问题是用户只会传来短链接网址，而不会传递gid，我们先设计路由表t_goto_link，并且选取短链接网址作为分片键，这样让用户首先在路由表中查询根据短链接网址查询出gid，再拿着gid去t_link中查询原始链接（为何设计路由表先不挑明，读者可以根据下面的实验自行思考下）</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 根据原始短链接来查询路由表中的 gid
@@ -144,19 +136,19 @@
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2.png"
-        data-srcset="/images/2.png, /images/2.png 1.5x, /images/2.png 2x"
+        data-src="/images/image2.png"
+        data-srcset="/images/image2.png, /images/image2.png 1.5x, /images/image2.png 2x"
         data-sizes="auto"
-        alt="/images/2.png"
-        title="2" /></p>
+        alt="/images/image2.png"
+        title="2" width="530" height="440" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2-5.png"
-        data-srcset="/images/2-5.png, /images/2-5.png 1.5x, /images/2-5.png 2x"
+        data-src="/images/image3.png"
+        data-srcset="/images/image3.png, /images/image3.png 1.5x, /images/image3.png 2x"
         data-sizes="auto"
-        alt="/images/2-5.png"
-        title="2.5" /></p>
+        alt="/images/image3.png"
+        title="2.5" width="544" height="491" /></p>
 <h3 id="直接查询原表">直接查询原表</h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">LambdaQueryWrapper</span><span class="o">&lt;</span><span class="n">ShortLinkDO</span><span class="o">&gt;</span> <span class="n">queryWrapper</span> <span class="o">=</span> <span class="n">Wrappers</span><span class="o">.</span><span class="na">lambdaQuery</span><span class="o">(</span><span class="n">ShortLinkDO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
 </span></span><span class="line"><span class="cl">        <span class="c1">// 这里没有 gid，而是直接查出原始 url
@@ -168,19 +160,19 @@
 </span></span></code></pre></div><p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/3.png"
-        data-srcset="/images/3.png, /images/3.png 1.5x, /images/3.png 2x"
+        data-src="/images/image4.png"
+        data-srcset="/images/image4.png, /images/image4.png 1.5x, /images/image4.png 2x"
         data-sizes="auto"
-        alt="/images/3.png"
-        title="5" />
+        alt="/images/image4.png"
+        title="5" width="510" height="336" />
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/4.png"
-        data-srcset="/images/4.png, /images/4.png 1.5x, /images/4.png 2x"
+        data-src="/images/image5.png"
+        data-srcset="/images/image5.png, /images/image5.png 1.5x, /images/image5.png 2x"
         data-sizes="auto"
-        alt="/images/4.png"
-        title="6" /></p>
+        alt="/images/image5.png"
+        title="6" width="510" height="338" /></p>
 <p>怎么还是和引入路由表时间差不多，都是 50 ms 左右？话说不应该啊？难道引入路由表引入了个寂寞？
 而且后期肯定要针对路由信息加缓存，到时候岂不是 MySQL 和 Redis 两头空？</p>
 <h3 id="小插曲">小插曲</h3>
@@ -188,64 +180,64 @@
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/5.png"
-        data-srcset="/images/5.png, /images/5.png 1.5x, /images/5.png 2x"
+        data-src="/images/image6.png"
+        data-srcset="/images/image6.png, /images/image6.png 1.5x, /images/image6.png 2x"
         data-sizes="auto"
-        alt="/images/5.png"
-        title="7" />
+        alt="/images/image6.png"
+        title="7" width="1509" height="446" />
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/6.png"
-        data-srcset="/images/6.png, /images/6.png 1.5x, /images/6.png 2x"
+        data-src="/images/image7.png"
+        data-srcset="/images/image7.png, /images/image7.png 1.5x, /images/image7.png 2x"
         data-sizes="auto"
-        alt="/images/6.png"
-        title="8" /></p>
+        alt="/images/image7.png"
+        title="8" width="1037" height="430" /></p>
 <p>确定 Sharding Sphere 没有问题后，笔者试着查了查本机数据库，好家伙，一下子就发现t_link表咋大部分都是没记录的！
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/7.png"
-        data-srcset="/images/7.png, /images/7.png 1.5x, /images/7.png 2x"
+        data-src="/images/image8.png"
+        data-srcset="/images/image8.png, /images/image8.png 1.5x, /images/image8.png 2x"
         data-sizes="auto"
-        alt="/images/7.png"
-        title="9" /></p>
+        alt="/images/image8.png"
+        title="9" width="785" height="304" /></p>
 <p>只有t_link_1有 2w 左右数据
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/8.png"
-        data-srcset="/images/8.png, /images/8.png 1.5x, /images/8.png 2x"
+        data-src="/images/image9.png"
+        data-srcset="/images/image9.png, /images/image9.png 1.5x, /images/image9.png 2x"
         data-sizes="auto"
-        alt="/images/8.png"
-        title="10" /></p>
+        alt="/images/image9.png"
+        title="10" width="699" height="60" /></p>
 <p>真相就水落石出了：联合表了，但是联合了 15 张空表，【联合了，但没完全联】
 于是笔者开始疯狂加数据，直到把其余的t_link表量级抬上去，插入 1w 条数据
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/9.png"
-        data-srcset="/images/9.png, /images/9.png 1.5x, /images/9.png 2x"
+        data-src="/images/image10.png"
+        data-srcset="/images/image10.png, /images/image10.png 1.5x, /images/image10.png 2x"
         data-sizes="auto"
-        alt="/images/9.png"
-        title="11" /></p>
+        alt="/images/image10.png"
+        title="11" width="784" height="136" /></p>
 <p>开测！！！
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/10.png"
-        data-srcset="/images/10.png, /images/10.png 1.5x, /images/10.png 2x"
+        data-src="/images/image11.png"
+        data-srcset="/images/image11.png, /images/image11.png 1.5x, /images/image11.png 2x"
         data-sizes="auto"
-        alt="/images/10.png"
-        title="12" />
+        alt="/images/image11.png"
+        title="12" width="528" height="442" />
 <img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/11.png"
-        data-srcset="/images/11.png, /images/11.png 1.5x, /images/11.png 2x"
+        data-src="/images/image12.png"
+        data-srcset="/images/image12.png, /images/image12.png 1.5x, /images/image12.png 2x"
         data-sizes="auto"
-        alt="/images/11.png"
-        title="13" /></p>
+        alt="/images/image12.png"
+        title="13" width="511" height="410" /></p>
 <p>结果确实花费时间要长，要是数据量级再大点（比如千万级别），还能更加体现路由表的优越性！</p>
 <h2 id="设计路由表的原理">设计路由表的原理</h2>
 <p>不难发现，不用分片键直接查询会导致 读扩散：即联合所有的表挨个查。要是使用分片键查的话就会直接通过分片规则直接定位到一张表中（比如增加查询条件分片键 gid 后，就会根据 gid Hash 到某一张表中，要查到数据就集中在那里）
