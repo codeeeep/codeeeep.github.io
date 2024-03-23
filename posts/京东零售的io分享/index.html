@@ -25,7 +25,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/codeeeep.github.io\/posts\/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB\/"
-        },"genre": "posts","keywords": "他山之石","wordcount":  3084 ,
+        },"genre": "posts","keywords": "他山之石","wordcount":  3087 ,
         "url": "https:\/\/codeeeep.github.io\/posts\/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB\/","datePublished": "2024-03-23T15:23:30+08:00","dateModified": "2024-03-23T15:23:30+08:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -67,7 +67,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">剖析京东零售分享的伪代码———挖掘 IO 模型</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>codeep</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-23">2024-03-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3084 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-23">2024-03-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3087 字&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 7 分钟&nbsp;
     
 
@@ -165,24 +165,29 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">arr</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>
 </span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><p>话说怎么和 NIO 长得一样？就是少了异步线程轮询处理逻辑。
-这是因为 select 是操作系统提供的系统函数，通过它我们可以将文件描述符发送给系统，让系统内核帮我们遍历检测是否可读，并告诉我们进行读取数据。而<strong>具体实现的伪代码原作者没有给出</strong>，但是也没有关系，能确定的就是IO 多路复用的异步线程肯定就不是轮询容器了，而是<strong>阻塞监听</strong>
-下面的两幅图都是 异步线程 做的事，可以对比看看不同：select 阻塞监听所有 FD 需要的资源，当资源就绪就能通过 事件通知机制 唤醒异步线程，然后就能处理普通（第一阶段阻塞还是非阻塞问题不大，因为资源此时肯定是就绪的） read 操作，完成后移除该 FD 后就能继续循环监听</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/images/image2-1.png"
-        data-srcset="/images/image2-1.png, /images/image2-1.png 1.5x, /images/image2-1.png 2x"
-        data-sizes="auto"
-        alt="/images/image2-1.png"
-        title="NIO" width="681" height="505" /></p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/images/image2-2.png"
-        data-srcset="/images/image2-2.png, /images/image2-2.png 1.5x, /images/image2-2.png 2x"
-        data-sizes="auto"
-        alt="/images/image2-2.png"
-        title="select" width="688" height="503" /></p>
+这是因为 select 是操作系统提供的系统函数，通过它我们可以将文件描述符发送给系统，让系统内核帮我们遍历检测是否可读，并告诉我们进行读取数据。而<strong>具体实现的伪代码原作者没有给出</strong>，但是也没有关系，能确定的就是IO 多路复用的异步线程肯定就不是轮询容器了，而是<strong>阻塞监听</strong>。</p>
+<p>下面的两幅图都是 异步线程 做的事，可以对比看看不同：select 阻塞监听所有 FD 需要的资源，当资源就绪就能通过 事件通知机制 唤醒异步线程，然后就能处理普通（第一阶段阻塞还是非阻塞问题不大，因为资源此时肯定是就绪的） read 操作，完成后移除该 FD 后就能继续循环监听</p>
+<p><figure><a class="lightgallery" href="/images/image2-1.png" title="NIO" data-thumbnail="/images/image2-1.png" data-sub-html="<h2>NIO</h2><p>NIO</p>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/images/image2-1.png"
+            data-srcset="/images/image2-1.png, /images/image2-1.png 1.5x, /images/image2-1.png 2x"
+            data-sizes="auto"
+            alt="/images/image2-1.png" width="681" height="505" />
+    </a><figcaption class="image-caption">NIO</figcaption>
+    </figure></p>
+<p><figure><a class="lightgallery" href="/images/image2-2.png" title="select" data-thumbnail="/images/image2-2.png" data-sub-html="<h2>select</h2><p>select</p>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/images/image2-2.png"
+            data-srcset="/images/image2-2.png, /images/image2-2.png 1.5x, /images/image2-2.png 2x"
+            data-sizes="auto"
+            alt="/images/image2-2.png" width="688" height="503" />
+    </a><figcaption class="image-caption">select</figcaption>
+    </figure></p>
+<!-- raw HTML omitted -->
 <p>最后是 epoll 的伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
