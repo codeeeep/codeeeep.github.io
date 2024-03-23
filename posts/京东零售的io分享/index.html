@@ -25,7 +25,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/codeeeep.github.io\/posts\/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB\/"
-        },"genre": "posts","keywords": "他山之石","wordcount":  3087 ,
+        },"genre": "posts","keywords": "他山之石","wordcount":  3111 ,
         "url": "https:\/\/codeeeep.github.io\/posts\/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB\/","datePublished": "2024-03-23T15:23:30+08:00","dateModified": "2024-03-23T15:23:30+08:00","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -67,7 +67,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">剖析京东零售分享的伪代码———挖掘 IO 模型</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>codeep</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-23">2024-03-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3087 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-23">2024-03-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3111 字&nbsp;
                 <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 7 分钟&nbsp;
     
 
@@ -95,12 +95,25 @@
                     <span>目录</span>
                     <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
                 </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#bio">BIO</a></li>
+        <li><a href="#nio">NIO</a></li>
+        <li><a href="#io-多路复用中的-select">IO 多路复用中的 select</a></li>
+        <li><a href="#io-多路复用中的-epoll">IO 多路复用中的 epoll</a></li>
+        <li><a href="#事件通知机制">事件通知机制</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
             </div><div class="content" id="content"><blockquote>
 <p>之前学 IO 模型总是觉得太过抽象，网上的众多博客也是泛泛而谈，偶然搜索微信公众号的 IO 系列，竟然发现了一篇宝藏博文，特来和大家一起分享。同时有疑问也可以直接评论区留言探讨~
 原文链接：<a href="https://mp.weixin.qq.com/s/pH767QK6wQOZBEbSyuw6xQ" target="_blank" rel="noopener noreffer ">京东零售技术：IO模型介绍</a></p>
 </blockquote>
 <p>京东零售的博文中总共出现过四个伪代码：<strong>BIO</strong>，<strong>NIO</strong>，IO多路复用的 <strong>select</strong> 和 <strong>epoll</strong></p>
+<h3 id="bio">BIO</h3>
 <p>首先来看看 BIO 的伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
@@ -113,6 +126,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">close</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>     <span class="c1">// 关闭连接
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
 </span></span></code></pre></div><p>每当用户态来 socket 建立连接后(accept)，就直接调用 read 来阻塞读取数据了，此时其他用户态的 socket 来建立连接就卡住了，因为是单线程的。所以内核态真的就是完全串行接收请求了，通过阻塞达到串行的效果了，全由 <strong>“主线程”</strong> 来包揽建立连接和 read 读取数据</p>
+<h3 id="nio">NIO</h3>
 <p>接下来看看 NIO 的伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Arr</span><span class="o">[];</span>
 </span></span><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
@@ -155,6 +169,7 @@
 <p>注意区分异步和非阻塞的区别：异步线程是实现非阻塞的必要条件，必须拿出一个线程来轮询容器才能实现非阻塞 read，你一个线程既要阻塞建立连接又要轮询遍历容器，不可能的
 同时异步线程只是起到解耦的作用，核心是 read 的第一阶段非阻塞。试想要是 read 两阶段全阻塞，你另外开个线程也没多大效果，运气好第一个遍历的就就绪然后完成，运气不好还得阻塞等他就绪，和一个线程没有两样</p>
 </blockquote>
+<h3 id="io-多路复用中的-select">IO 多路复用中的 select</h3>
 <p>接下来看看 IO 多路复用的 select 伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Arr</span><span class="o">[];</span>
 </span></span><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
@@ -187,7 +202,7 @@
             alt="/images/image2-2.png" width="688" height="503" />
     </a><figcaption class="image-caption">select</figcaption>
     </figure></p>
-<!-- raw HTML omitted -->
+<h3 id="io-多路复用中的-epoll">IO 多路复用中的 epoll</h3>
 <p>最后是 epoll 的伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
@@ -235,8 +250,9 @@
 <p>“用于监听套接字事件，可以通过设置超时时间timeout来控制监听的行为为阻塞模式还是超时模式”，搭配上内核空间中的 while(1) 循环的目的：“检测就绪队列是否有事件，有就读取就绪队列并返回，没有则阻塞等待”可以得知<strong>第一个问题的全部答案</strong>：当就绪队列中有数据的时候才返回 true，不是什么回调通知让他返回，回调通知起到一个间接的作用（epoll 对象检测到 “数据可读或可写准备就绪的回调通知” 的时候就会往就绪队列放入这个就绪的资源，这时候就绪队列就有数据了，<code>epoll_wait</code>来读取就绪队列就能返回成功了），并且是阻塞的，因为成功就读取然后返回，失败阻塞等待。</p>
 <p>至于第二个问题就迎刃而解了，因为要是<code>epoll_wait</code>返回 true 的话，就说明返回的arr里全是刚刚扫荡 epoll 中就绪队列里就绪的资源，先回忆一下前面几个 IO 模型中arr里都是什么妖魔鬼怪：NIO 和 select 里的<code>arr</code>都是连接后的产物<code>connfd</code>，他们的资源就没就绪都是未知的，而这里全是就绪的资源。下面的遍历都很有价值，都是精准服务（也就是轮询都是有效的，而以前轮询效率极低）。</p>
 <p>还有“仅返回可读套接字”并不是上面疑问中说的可写的不行，为了解答这个问题，我们<strong>先看看伪代码</strong>中<code>newTheadDeal(connfd)</code>中做的事：注意到<code>buf[1024]</code>没有？也即是说每次epoll_wait()成功后执行一次read都只能最多读满 buf 就完了，这就导致要是传来就绪队列中的对应 FD 需要的资源大于 1024 字节的时候，你在这次 read 是搞不完的，只能读取到最多 1024 字节。这就叫“仅返回可读套接字”，而不是读和写的问题。</p>
+<h3 id="事件通知机制">事件通知机制</h3>
 <p>好的这里又牵扯出 <strong>最多读 1024 字节那剩余的怎么处理?</strong> 就这么错过了？毕竟 for 循环中遍历的不止你一个 FD，还有其他资源也就绪的 FD 要执行 read。
-不卖关子了。这就是 epoll 中的事件通知机制：<code>epoll_wait</code>返回 true 后下次碰到残余的因为 buf 限制没有 read 完的怎么处理。</p>
+不卖关子了。这就是 epoll 中的<strong>事件通知机制</strong>：<code>epoll_wait</code>返回 true 后下次碰到残余的因为 buf 限制没有 read 完的怎么处理。</p>
 <ol>
 <li>LT：水平触发。意思就是碰到就绪的资源是之前同一个 FD 请求的也给你返回（类似消息重发机制）（怎么判断是不是残余或者怎么判断 read 操作有没有读完？这个我估计应该是读取完毕会有一个标记位给 epoll，或者没有读取到资源结尾标记符就不会发送类似 ack 这样的标记）。好处是保证 FD 需要的资源能够全部读取完毕。坏处就是要是每次都要带上重复的资源也是一种浪费</li>
 <li>ET：边缘触发。意思刚好相反，碰到就绪的资源是之前同一个 FD 请求的我也不放进就绪队列中，反正我之前都已经放过了，read 自己没处理完与我无关。好处是确实减少了很多类似重发就绪资源的动作，缺点是既然只能一次返回，就需要循环读取返回回来的就绪的资源了，而不是单单靠着 <code>buf[1024]</code>一板斧打天下
