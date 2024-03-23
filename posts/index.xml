@@ -6,10 +6,10 @@
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>codeeeep@gmail.com (codeep)</managingEditor>
             <webMaster>codeeeep@gmail.com (codeep)</webMaster><lastBuildDate>Sat, 23 Mar 2024 15:23:30 &#43;0800</lastBuildDate><atom:link href="https://codeeeep.github.io/posts/" rel="self" type="application/rss+xml" /><item>
     <title>剖析京东零售分享的伪代码———挖掘 IO 模型</title>
-    <link>https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/</link>
+    <link>https://codeeeep.github.io/posts/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB/</link>
     <pubDate>Sat, 23 Mar 2024 15:23:30 &#43;0800</pubDate>
     <author>codeep</author>
-    <guid>https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/</guid>
+    <guid>https://codeeeep.github.io/posts/%E4%BA%AC%E4%B8%9C%E9%9B%B6%E5%94%AE%E7%9A%84io%E5%88%86%E4%BA%AB/</guid>
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/run.jpg" referrerpolicy="no-referrer">
             </div>精读优秀博文，品味深度内涵]]></description>
