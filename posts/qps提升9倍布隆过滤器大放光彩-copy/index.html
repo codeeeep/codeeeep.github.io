@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>剖析京东零售分享的伪代码———挖掘 IO 模型 - Codeep&#39;s Blog</title><meta name="Description" content="这是我的全新 Hugo 网站"><meta property="og:title" content="剖析京东零售分享的伪代码———挖掘 IO 模型" />
+<meta property="og:description" content="精读优秀博文，品味深度内涵" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-23T15:23:30+08:00" />
+<meta property="article:modified_time" content="2024-03-23T15:23:30+08:00" /><meta property="og:site_name" content="我的网站" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="剖析京东零售分享的伪代码———挖掘 IO 模型"/>
+<meta name="twitter:description" content="精读优秀博文，品味深度内涵"/>
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="icon" href="/avatar.svg"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" /><link rel="prev" href="https://codeeeep.github.io/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "剖析京东零售分享的伪代码———挖掘 IO 模型",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/codeeeep.github.io\/posts\/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy\/"
+        },"genre": "posts","keywords": "他山之石","wordcount":  3084 ,
+        "url": "https:\/\/codeeeep.github.io\/posts\/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy\/","datePublished": "2024-03-23T15:23:30+08:00","dateModified": "2024-03-23T15:23:30+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "codeep"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Codeep&#39;s Blog">Codeep&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/about/"> 关于我 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Codeep&#39;s Blog">Codeep&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/about/" title="">关于我</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">剖析京东零售分享的伪代码———挖掘 IO 模型</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>codeep</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2024-03-23">2024-03-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3084 字&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 7 分钟&nbsp;
+    
+
+    
+        
+
+        
+        
+            <span id="busuanzi_container_value_page_pv"><i class="far fa-eye fa-fw"></i>
+                
+                <span id="busuanzi_value_page_pv"></span>&nbsp;次阅读</span>
+        
+    
+
+</div>
+        </div><div class="featured-image"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/run.jpg"
+        data-srcset="/images/run.jpg, /images/run.jpg 1.5x, /images/run.jpg 2x"
+        data-sizes="auto"
+        alt="/images/run.jpg"
+        title="/images/run.jpg" width="4608" height="3072" /></div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
+            </div><div class="content" id="content"><blockquote>
+<p>之前学 IO 模型总是觉得太过抽象，网上的众多博客也是泛泛而谈，偶然搜索微信公众号的 IO 系列，竟然发现了一篇宝藏博文，特来和大家一起分享。同时有疑问也可以直接评论区留言探讨~
+原文链接：<a href="https://mp.weixin.qq.com/s/pH767QK6wQOZBEbSyuw6xQ" target="_blank" rel="noopener noreffer ">京东零售技术：IO模型介绍</a></p>
+</blockquote>
+<p>京东零售的博文中总共出现过四个伪代码：<strong>BIO</strong>，<strong>NIO</strong>，IO多路复用的 <strong>select</strong> 和 <strong>epoll</strong></p>
+<p>首先来看看 BIO 的伪代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">listen</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>      <span class="c1">// 监听
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">buf</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span> <span class="c1">// 读取数据容器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">connfd</span> <span class="o">=</span> <span class="n">accept</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>  <span class="c1">// 阻塞 等待建立连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">connfd</span><span class="o">,</span> <span class="n">buf</span><span class="o">);</span>  <span class="c1">// 阻塞 读数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">doSomeThing</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>  <span class="c1">// 处理数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">close</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>     <span class="c1">// 关闭连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><p>每当用户态来 socket 建立连接后(accept)，就直接调用 read 来阻塞读取数据了，此时其他用户态的 socket 来建立连接就卡住了，因为是单线程的。所以内核态真的就是完全串行接收请求了，通过阻塞达到串行的效果了，全由 <strong>“主线程”</strong> 来包揽建立连接和 read 读取数据</p>
+<p>接下来看看 NIO 的伪代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Arr</span><span class="o">[];</span>
+</span></span><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">listen</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>      <span class="c1">// 监听
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">connfd</span> <span class="o">=</span> <span class="n">accept</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>  <span class="c1">// 阻塞 等待建立连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">arr</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 异步线程检测 连接是否可读
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">new</span> <span class="n">Tread</span><span class="o">(){</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="o">(</span><span class="n">connfd</span> <span class="o">:</span> <span class="n">arr</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">buf</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span> <span class="c1">// 读取数据容器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 非阻塞 read 最重要的是提供了我们在一个线程内管理多个文件描述符的能力
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">connfd</span><span class="o">,</span> <span class="n">buf</span><span class="o">);</span>  <span class="c1">// 检测 connfd 是否可读
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span><span class="o">(</span><span class="n">n</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">       <span class="n">newThreadDeal</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>   <span class="c1">// 创建新线程处理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       <span class="n">close</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>        <span class="c1">// 关闭连接 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       <span class="n">arr</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>   <span class="c1">// 移除已处理的连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">newTheadDeal</span><span class="o">(</span><span class="n">buf</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">  <span class="n">doSomeThing</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>  <span class="c1">// 处理数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><p>说下改变的点：</p>
+<ul>
+<li>read 这个动作没有放在 <strong>“主线程”</strong> 中，主线程就负责建立连接，然后把建立连接后产生的 FD 我先放入<code>Arr[]</code>中，（这里暂时看作一个普通的数组就行，后续 select 的具体实现就是 BitsMap 实现的数组）把 read 这个操作解耦，不放在“主线程”中，而是通过后面的<code>new Thread()</code>来执行 read</li>
+<li>后面的线程也就是遍历 <code>Arr[]</code>，拿到一个不管这个 FD 需要的资源有没有，read 就完事（read 有两阶段：等待读就绪：这里非阻塞，读数据：这里阻塞），由于第一阶段非阻塞，发现没有就绪就继续遍历<code>Arr[]</code>，同样也是对新一个 FD 进行 read，如果这个 FD 需要的资源就绪，就能阻塞执行第二阶段了，读取结束后还要移除这个 FD，然后继续循环拿出 FD 执行 read&hellip;</li>
+</ul>
+<p><strong>总结下</strong>：</p>
+<ul>
+<li>主线程 —— &gt;  主线程 + 异步处理线程</li>
+<li>read 两阶段全阻塞 ——&gt; read 等待读就绪非阻塞，读数据阻塞</li>
+<li>来个用户态连接就一条龙处理 ——&gt; 来用户态连接先放入容器中，主线程继续处理其余连接，异步线程遍历容器处理 read 操作</li>
+</ul>
+<blockquote>
+<p>注意区分异步和非阻塞的区别：异步线程是实现非阻塞的必要条件，必须拿出一个线程来轮询容器才能实现非阻塞 read，你一个线程既要阻塞建立连接又要轮询遍历容器，不可能的
+同时异步线程只是起到解耦的作用，核心是 read 的第一阶段非阻塞。试想要是 read 两阶段全阻塞，你另外开个线程也没多大效果，运气好第一个遍历的就就绪然后完成，运气不好还得阻塞等他就绪，和一个线程没有两样</p>
+</blockquote>
+<p>接下来看看 IO 多路复用的 select 伪代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Arr</span><span class="o">[];</span>
+</span></span><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">listen</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>      <span class="c1">// 监听
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">connfd</span> <span class="o">=</span> <span class="n">accept</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>  <span class="c1">// 阻塞 等待建立连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">arr</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p>话说怎么和 NIO 长得一样？就是少了异步线程轮询处理逻辑。
+这是因为 select 是操作系统提供的系统函数，通过它我们可以将文件描述符发送给系统，让系统内核帮我们遍历检测是否可读，并告诉我们进行读取数据。而<strong>具体实现的伪代码原作者没有给出</strong>，但是也没有关系，能确定的就是IO 多路复用的异步线程肯定就不是轮询容器了，而是<strong>阻塞监听</strong>
+下面的两幅图都是 异步线程 做的事，可以对比看看不同：select 阻塞监听所有 FD 需要的资源，当资源就绪就能通过 事件通知机制 唤醒异步线程，然后就能处理普通（第一阶段阻塞还是非阻塞问题不大，因为资源此时肯定是就绪的） read 操作，完成后移除该 FD 后就能继续循环监听</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2-1.png"
+        data-srcset="/images/2-1.png, /images/2-1.png 1.5x, /images/2-1.png 2x"
+        data-sizes="auto"
+        alt="/images/2-1.png"
+        title="NIO" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2-2.png"
+        data-srcset="/images/2-2.png, /images/2-2.png 1.5x, /images/2-2.png 2x"
+        data-sizes="auto"
+        alt="/images/2-2.png"
+        title="select" /></p>
+<p>最后是 epoll 的伪代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">listen</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>      <span class="c1">// 监听
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">epfd</span> <span class="o">=</span> <span class="n">epoll_create</span><span class="o">(...);</span> <span class="c1">// 创建 epoll 对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">connfd</span> <span class="o">=</span> <span class="n">accept</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>  <span class="c1">// 阻塞 等待建立连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">epoll_ctl</span><span class="o">(</span><span class="n">connfd</span><span class="o">,</span> <span class="o">...);</span>  <span class="c1">// 将新连接加入到 epoll 对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 异步线程检测 通过 epoll_wait 阻塞获取可读的套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">new</span> <span class="n">Tread</span><span class="o">(){</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="o">(</span><span class="n">arr</span> <span class="o">=</span> <span class="n">epoll_wait</span><span class="o">()){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="n">connfd</span> <span class="o">:</span> <span class="n">arr</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 仅返回可读套接字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">newTheadDeal</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">newTheadDeal</span><span class="o">(</span><span class="n">connfd</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">buf</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span> <span class="c1">// 读取数据容器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">connfd</span><span class="o">,</span> <span class="n">buf</span><span class="o">);</span>  <span class="c1">// 阻塞读取数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">doSomeThing</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>  <span class="c1">// 处理数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">close</span><span class="o">(</span><span class="n">connfd</span><span class="o">);</span>        <span class="c1">// 关闭连接 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><ul>
+<li>和 select 不同的是主线程建立连接后，把新连接的直接加入到 epoll 对象中（里面的红黑树），而非<code>Arr[]</code></li>
+<li>这里又点明了异步线程，<strong>复习一下</strong>：异步线程中 NIO 是遍历容器，通过 read 无阻塞轮询是否有就绪资源；select 异步线程没有点明，但是能够知道不是遍历容器了，而是监听资源，当有资源就绪就去执行 read 操作（第一步阻塞还是非阻塞不重要）；而在 epoll 中则是通过循环调用 <code>epoll_wait()</code>，当 <code>epoll_wait()</code>返回 true 的时候才会遍历容器（这个容器不是 epoll 对象中的红黑树，而装有已经资源就绪的 FD 的容器），遍历容器只返回可读套接字（这里还是阻塞去读取）</li>
+</ul>
+<p>这里就涉及<strong>两个问题</strong>：</p>
+<ol>
+<li>什么时候<code>epoll_wait()</code>返回 true，阻塞还是非阻塞的？是什么回调通知可以让他返回 true 吗？是不是根本不会返回false而是阻塞和返回 true 两个状态？</li>
+<li>遍历容器的时候什么叫做“仅返回可读套接字”？意思是可写的不行？
+为了弄清上述两个疑问，我们看看原博主对<code>epoll_wait()</code>函数的系统底层逻辑图示：</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2-3.png"
+        data-srcset="/images/2-3.png, /images/2-3.png 1.5x, /images/2-3.png 2x"
+        data-sizes="auto"
+        alt="/images/2-3.png"
+        title="epoll_wait()" /></p>
+<p>“用于监听套接字事件，可以通过设置超时时间timeout来控制监听的行为为阻塞模式还是超时模式”，搭配上内核空间中的 while(1) 循环的目的：“检测就绪队列是否有事件，有就读取就绪队列并返回，没有则阻塞等待”可以得知<strong>第一个问题的全部答案</strong>：当就绪队列中有数据的时候才返回 true，不是什么回调通知让他返回，回调通知起到一个间接的作用（epoll 对象检测到 “数据可读或可写准备就绪的回调通知” 的时候就会往就绪队列放入这个就绪的资源，这时候就绪队列就有数据了，<code>epoll_wait</code>来读取就绪队列就能返回成功了），并且是阻塞的，因为成功就读取然后返回，失败阻塞等待。</p>
+<p>至于第二个问题就迎刃而解了，因为要是<code>epoll_wait</code>返回 true 的话，就说明返回的arr里全是刚刚扫荡 epoll 中就绪队列里就绪的资源，先回忆一下前面几个 IO 模型中arr里都是什么妖魔鬼怪：NIO 和 select 里的<code>arr</code>都是连接后的产物<code>connfd</code>，他们的资源就没就绪都是未知的，而这里全是就绪的资源。下面的遍历都很有价值，都是精准服务（也就是轮询都是有效的，而以前轮询效率极低）。</p>
+<p>还有“仅返回可读套接字”并不是上面疑问中说的可写的不行，为了解答这个问题，我们<strong>先看看伪代码</strong>中<code>newTheadDeal(connfd)</code>中做的事：注意到<code>buf[1024]</code>没有？也即是说每次epoll_wait()成功后执行一次read都只能最多读满 buf 就完了，这就导致要是传来就绪队列中的对应 FD 需要的资源大于 1024 字节的时候，你在这次 read 是搞不完的，只能读取到最多 1024 字节。这就叫“仅返回可读套接字”，而不是读和写的问题。</p>
+<p>好的这里又牵扯出 <strong>最多读 1024 字节那剩余的怎么处理?</strong> 就这么错过了？毕竟 for 循环中遍历的不止你一个 FD，还有其他资源也就绪的 FD 要执行 read。
+不卖关子了。这就是 epoll 中的事件通知机制：<code>epoll_wait</code>返回 true 后下次碰到残余的因为 buf 限制没有 read 完的怎么处理。</p>
+<ol>
+<li>LT：水平触发。意思就是碰到就绪的资源是之前同一个 FD 请求的也给你返回（类似消息重发机制）（怎么判断是不是残余或者怎么判断 read 操作有没有读完？这个我估计应该是读取完毕会有一个标记位给 epoll，或者没有读取到资源结尾标记符就不会发送类似 ack 这样的标记）。好处是保证 FD 需要的资源能够全部读取完毕。坏处就是要是每次都要带上重复的资源也是一种浪费</li>
+<li>ET：边缘触发。意思刚好相反，碰到就绪的资源是之前同一个 FD 请求的我也不放进就绪队列中，反正我之前都已经放过了，read 自己没处理完与我无关。好处是确实减少了很多类似重发就绪资源的动作，缺点是既然只能一次返回，就需要循环读取返回回来的就绪的资源了，而不是单单靠着 <code>buf[1024]</code>一板斧打天下
+这里给出其他博主更好理解的栗子</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2-4.png"
+        data-srcset="/images/2-4.png, /images/2-4.png 1.5x, /images/2-4.png 2x"
+        data-sizes="auto"
+        alt="/images/2-4.png"
+        title="事件通知机制" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-03-23</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" data-title="剖析京东零售分享的伪代码———挖掘 IO 模型" data-hashtags="他山之石"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" data-hashtag="他山之石"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" data-title="剖析京东零售分享的伪代码———挖掘 IO 模型"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" data-title="剖析京东零售分享的伪代码———挖掘 IO 模型"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@7.3.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://codeeeep.github.io/posts/qps%E6%8F%90%E5%8D%879%E5%80%8D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A4%A7%E6%94%BE%E5%85%89%E5%BD%A9-copy/" data-title="剖析京东零售分享的伪代码———挖掘 IO 模型" data-image="/images/run.jpg"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/%E4%BB%96%E5%B1%B1%E4%B9%8B%E7%9F%B3/">他山之石</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E8%A1%A8%E4%B8%8B%E7%9A%84%E8%AF%BB%E6%89%A9%E6%95%A3%E9%97%AE%E9%A2%98/" class="prev" rel="prev" title="如何避免分表下的读扩散问题"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>如何避免分表下的读扩散问题</a></div>
+</div>
+<div id="comments"><div id="giscus" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://giscus.app">Giscus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2023 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">codeep</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span><span class="icp-splitter">&nbsp;|&nbsp;</span><br class="icp-br"/>
+                    <span class="icp"><a href="https://beian.miit.gov.cn/">赣ICP备2022010224号-1</a></span></div>
+    
+        
+        <script async src=" //busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js "></script>
+    
+
+    
+        
+            <section>
+                
+
+                
+
+                
+            </section>
+        
+
+        
+        
+    
+
+</div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":50},"comment":{"giscus":{"category":"Announcements","categoryId":"DIC_kwDOJ_INd84CYGGX","darkTheme":"dark_dimmed","emitMetadata":"0","inputPosition":"bottom","lang":"zh-CN","lazyLoading":false,"lightTheme":"light","mapping":"pathname","reactionsEnabled":"1","repo":"codeeeep/Giscus","repoId":"R_kgDOJ_INdw"}}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
