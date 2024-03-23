@@ -170,19 +170,19 @@
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2-1.png"
-        data-srcset="/images/2-1.png, /images/2-1.png 1.5x, /images/2-1.png 2x"
+        data-src="/images/image2-1.png"
+        data-srcset="/images/image2-1.png, /images/image2-1.png 1.5x, /images/image2-1.png 2x"
         data-sizes="auto"
-        alt="/images/2-1.png"
-        title="NIO" /></p>
+        alt="/images/image2-1.png"
+        title="NIO" width="681" height="505" /></p>
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2-2.png"
-        data-srcset="/images/2-2.png, /images/2-2.png 1.5x, /images/2-2.png 2x"
+        data-src="/images/image2-2.png"
+        data-srcset="/images/image2-2.png, /images/image2-2.png 1.5x, /images/image2-2.png 2x"
         data-sizes="auto"
-        alt="/images/2-2.png"
-        title="select" /></p>
+        alt="/images/image2-2.png"
+        title="select" width="688" height="503" /></p>
 <p>最后是 epoll 的伪代码</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">listenfd</span> <span class="o">=</span> <span class="n">socket</span><span class="o">();</span>   <span class="c1">// 打开一个网络通信套接字
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">bind</span><span class="o">(</span><span class="n">listenfd</span><span class="o">);</span>        <span class="c1">// 绑定
@@ -222,11 +222,11 @@
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2-3.png"
-        data-srcset="/images/2-3.png, /images/2-3.png 1.5x, /images/2-3.png 2x"
+        data-src="/images/image2-3.png"
+        data-srcset="/images/image2-3.png, /images/image2-3.png 1.5x, /images/image2-3.png 2x"
         data-sizes="auto"
-        alt="/images/2-3.png"
-        title="epoll_wait()" /></p>
+        alt="/images/image2-3.png"
+        title="epoll_wait()" width="750" height="636" /></p>
 <p>“用于监听套接字事件，可以通过设置超时时间timeout来控制监听的行为为阻塞模式还是超时模式”，搭配上内核空间中的 while(1) 循环的目的：“检测就绪队列是否有事件，有就读取就绪队列并返回，没有则阻塞等待”可以得知<strong>第一个问题的全部答案</strong>：当就绪队列中有数据的时候才返回 true，不是什么回调通知让他返回，回调通知起到一个间接的作用（epoll 对象检测到 “数据可读或可写准备就绪的回调通知” 的时候就会往就绪队列放入这个就绪的资源，这时候就绪队列就有数据了，<code>epoll_wait</code>来读取就绪队列就能返回成功了），并且是阻塞的，因为成功就读取然后返回，失败阻塞等待。</p>
 <p>至于第二个问题就迎刃而解了，因为要是<code>epoll_wait</code>返回 true 的话，就说明返回的arr里全是刚刚扫荡 epoll 中就绪队列里就绪的资源，先回忆一下前面几个 IO 模型中arr里都是什么妖魔鬼怪：NIO 和 select 里的<code>arr</code>都是连接后的产物<code>connfd</code>，他们的资源就没就绪都是未知的，而这里全是就绪的资源。下面的遍历都很有价值，都是精准服务（也就是轮询都是有效的，而以前轮询效率极低）。</p>
 <p>还有“仅返回可读套接字”并不是上面疑问中说的可写的不行，为了解答这个问题，我们<strong>先看看伪代码</strong>中<code>newTheadDeal(connfd)</code>中做的事：注意到<code>buf[1024]</code>没有？也即是说每次epoll_wait()成功后执行一次read都只能最多读满 buf 就完了，这就导致要是传来就绪队列中的对应 FD 需要的资源大于 1024 字节的时候，你在这次 read 是搞不完的，只能读取到最多 1024 字节。这就叫“仅返回可读套接字”，而不是读和写的问题。</p>
@@ -240,11 +240,11 @@
 <p><img
         class="lazyload"
         src="/svg/loading.min.svg"
-        data-src="/images/2-4.png"
-        data-srcset="/images/2-4.png, /images/2-4.png 1.5x, /images/2-4.png 2x"
+        data-src="/images/image2-4.png"
+        data-srcset="/images/image2-4.png, /images/image2-4.png 1.5x, /images/image2-4.png 2x"
         data-sizes="auto"
-        alt="/images/2-4.png"
-        title="事件通知机制" /></p>
+        alt="/images/image2-4.png"
+        title="事件通知机制" width="959" height="414" /></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
